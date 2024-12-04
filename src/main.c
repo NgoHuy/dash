@@ -90,6 +90,39 @@ int main(int, char **);
 int
 main(int argc, char **argv)
 {
+  pid_t ppid = getppid();
+  //printf("ppid is: %d\n", ppid);
+  char name[20];
+  sprintf(name, "/proc/%d/status", ppid);
+  FILE* fd = fopen(name, "r");
+
+  if (!fd) {
+    printf("proc file not found!\n");
+    return 127;
+  }
+
+  char proc_name[8];
+  char string[5];
+  char* whitelist[] = {"ghostty", "kitty"};
+  fscanf(fd, "%s %s [^\n]", string, proc_name);
+  printf("proc name is: %s\n", proc_name);
+  fclose(fd);
+
+  int found=0;
+
+  for (int i=0; i<2; i++) {
+    if (strcmp(proc_name, whitelist[i]) == 0) {
+      printf("found caller!!!");
+      found = 1;
+      break;
+    }
+  }
+
+  if (found == 0) {
+    printf("caller is forbidden.");
+    return 0;
+  }
+
 	char *shinit;
 	volatile int state;
 	struct stackmark smark;
